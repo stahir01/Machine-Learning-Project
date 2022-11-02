@@ -1,10 +1,23 @@
 import os
 import numpy as np
 from tqdm import tqdm
-from skimage.io import imread, imshow
+from skimage.io import imread
 from skimage.transform import resize
+    
+def load_data(dataset="UNet_dataScienceBowl", transformation = None, n_train = None, n_test = None):
+    """
+    Load images as numpy arrays from raw images and combine multiple masks into one mask
 
-if __name__ == "__main__":
+    Args:
+        dataset (str, optional): Name of dataset. Defaults to "UNet_dataScienceBowl".
+        transformation (_type_, optional): Data transformation. Defaults to None.
+        n_train (_type_, optional): Number of training data. Defaults to None.
+        n_test (_type_, optional): Number of test data. Defaults to None.
+
+    Returns:
+        numpy arrays: data for training and testing
+    """
+
     np.random.seed(0)
 
     # Define the width, height, number of channels of input images
@@ -12,13 +25,13 @@ if __name__ == "__main__":
     IMG_HEIGHT = 256
     IMG_CHANNELS = 3
 
-    # Dataset path
+    # Specify path to dataset 
     DATA_PATH = 'data/'
     TRAIN_PATH = DATA_PATH + 'stage1_train/'  
     TEST_PATH = DATA_PATH + 'stage1_test/'  
 
     # next(os.walk(TRAIN_PATH)) -- [[PATH], [ids], []]
-    # Get all image names
+    # Get all image ids
     train_ids = next(os.walk(TRAIN_PATH))[1]
     test_ids = next(os.walk(TEST_PATH))[1]
     
@@ -29,6 +42,8 @@ if __name__ == "__main__":
     # Converting images as np array and combine masks as one mask
     for n, id_ in tqdm(enumerate(train_ids), total=len(train_ids)):
         path = TRAIN_PATH + id_
+
+        # Constraint number of channels
         img = imread(path + '/images/' + id_ + '.png')[:, :, :IMG_CHANNELS]
         img = resize(img, (IMG_HEIGHT, IMG_WIDTH), mode='constant', preserve_range=True)
         X_train[n] = img  
@@ -50,6 +65,11 @@ if __name__ == "__main__":
         img = imread(path + '/images/' + id_ + '.png')[:, :, :IMG_CHANNELS]
         img = resize(img, (IMG_HEIGHT, IMG_WIDTH), mode='constant', preserve_range=True)
         X_test[n] = img
+        
+    return X_train, Y_train, X_test
+
+if __name__ == "__main__":
+    X_train, Y_train, X_test = load_data()
         
     np.save("./data/X_train.npy", X_train)
     np.save("./data/Y_train.npy", Y_train)
