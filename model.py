@@ -36,33 +36,46 @@ class UNet(nn.Module):
 
 
     def forward(self, x):
+        print("Input shape: ", x.shape)
         x = F.relu(self.conv1(x))
+        print("conv1 shape: ", x.shape)
         x = F.relu(self.conv2(x))
+        print("conv2 shape: ", x.shape)
 
         cnc_2_17 = self.crop(x, 568, 392)
 
         x = self.pool(x)
         x = F.relu(self.conv3(x))
+        print("conv3 shape: ", x.shape)
         x = F.relu(self.conv4(x))
+        print("conv4 shape: ", x.shape)
 
         cnc_4_15 = self.crop(x, 280, 200)
 
         x = self.pool(x)
         x = F.relu(self.conv5(x))
+        print("conv5 shape: ", x.shape)
         x = F.relu(self.conv6(x))
+        print("conv6 shape: ", x.shape)
 
         cnc_6_13 = self.crop(x, 136, 104)
 
         x = self.pool(x)
         x = F.relu(self.conv7(x))
+        print("conv7 shape: ", x.shape)
         x = F.relu(self.conv8(x))
+        print("conv8 shape: ", x.shape)
 
         cnc_8_11 = self.crop(x, 64, 56)
 
         x = self.pool(x)
         x = F.relu(self.conv9(x))
+        print("conv9 shape: ", x.shape)
         x = F.relu(self.conv10(x))
+        print("conv10 shape: ", x.shape)
         x = self.up_conv1(x)
+        print(x.shape)
+        print(cnc_8_11.shape)
 
         x = torch.cat((cnc_8_11,x), dim=1)
         x = F.relu(self.conv11(x))
