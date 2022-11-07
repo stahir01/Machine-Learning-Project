@@ -36,65 +36,60 @@ class UNet(nn.Module):
 
 
     def forward(self, x):
-        print("Input shape: ", x.shape)
         x = F.relu(self.conv1(x))
-        print("conv1 shape: ", x.shape)
         x = F.relu(self.conv2(x))
-        print("conv2 shape: ", x.shape)
 
-        cnc_2_17 = self.crop(x, 568, 392)
+        # cnc_2_17 = self.crop(x, 568, 392)
+        cnc_2_17 = x
 
         x = self.pool(x)
         x = F.relu(self.conv3(x))
-        print("conv3 shape: ", x.shape)
         x = F.relu(self.conv4(x))
-        print("conv4 shape: ", x.shape)
 
-        cnc_4_15 = self.crop(x, 280, 200)
+        # cnc_4_15 = self.crop(x, 280, 200)
+        cnc_4_15 = x
 
         x = self.pool(x)
         x = F.relu(self.conv5(x))
-        print("conv5 shape: ", x.shape)
         x = F.relu(self.conv6(x))
-        print("conv6 shape: ", x.shape)
 
-        cnc_6_13 = self.crop(x, 136, 104)
+        # cnc_6_13 = self.crop(x, 136, 104)
+        cnc_6_13 = x
 
         x = self.pool(x)
         x = F.relu(self.conv7(x))
-        print("conv7 shape: ", x.shape)
         x = F.relu(self.conv8(x))
-        print("conv8 shape: ", x.shape)
 
-        cnc_8_11 = self.crop(x, 64, 56)
+        # cnc_8_11 = self.crop(x, 64, 56)
+        cnc_8_11 = x
 
         x = self.pool(x)
         x = F.relu(self.conv9(x))
-        print("conv9 shape: ", x.shape)
         x = F.relu(self.conv10(x))
-        print("conv10 shape: ", x.shape)
         x = self.up_conv1(x)
-        print(x.shape)
-        print(cnc_8_11.shape)
 
+        cnc_8_11 = self.crop(cnc_8_11, cnc_8_11.shape[2], x.shape[2])
         x = torch.cat((cnc_8_11,x), dim=1)
         x = F.relu(self.conv11(x))
 
         x = F.relu(self.conv12(x))
         x = self.up_conv2(x)
 
+        cnc_6_13 = self.crop(cnc_6_13, cnc_6_13.shape[2], x.shape[2])
         x = torch.cat((cnc_6_13,x), dim=1)
         x = F.relu(self.conv13(x))
 
         x = F.relu(self.conv14(x))
         x = self.up_conv3(x)
 
+        cnc_4_15 = self.crop(cnc_4_15, cnc_4_15.shape[2], x.shape[2])
         x = torch.cat((cnc_4_15,x), dim=1)
         x = F.relu(self.conv15(x))
 
         x = F.relu(self.conv16(x))
         x = self.up_conv4(x)
 
+        cnc_2_17 = self.crop(cnc_2_17, cnc_2_17.shape[2], x.shape[2])
         x = torch.cat((cnc_2_17,x), dim=1)
         x = F.relu(self.conv17(x))
         
