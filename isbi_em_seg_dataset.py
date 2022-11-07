@@ -36,7 +36,7 @@ class ISBIEMSegDataset(Dataset):
 
 
 if __name__ == '__main__':
-    dataset = ISBIEMSegDataset('./data/isbi_em_seg', transform=Compose([ToTensor(), Resize((572, 572))]))
+    dataset = ISBIEMSegDataset('./data/isbi_em_seg', transform=ToTensor())
     
     BATCH_SIZE = 5
     
