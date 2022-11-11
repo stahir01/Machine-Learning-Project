@@ -22,18 +22,18 @@ class ISBIEMSegDataset(Dataset):
 
     def __getitem__(self, index):
 
-        image = io.imread(os.path.join(self.path_images, self.image_paths[index]))
-        label = io.imread(os.path.join(self.path_labels, self.label_paths[index]))
+        image = io.imread(os.path.join(self.path_images, self.image_paths[index])) 
+        label = io.imread(os.path.join(self.path_labels, self.label_paths[index])) 
         
-        print(image.shape)
-        print(label.shape)
+        # print(image.shape)
+        # print(label.shape)
 
         if self.transform:
             image = self.transform(image)
             label = self.transform(label)
         
-        return image, label
-
+        return image.float(), label.float()
+        
 
 if __name__ == '__main__':
     dataset = ISBIEMSegDataset('./data/isbi_em_seg', transform=ToTensor())

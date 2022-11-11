@@ -3,7 +3,7 @@ from model import *
 
 import torch
 
-def train(epochs, batch_size=5, learning_rate=1e-3):
+def train(epochs, batch_size=2, learning_rate=1e-3):
     dataset = ISBIEMSegDataset('./data/isbi_em_seg', transform=ToTensor())
     dataloader = DataLoader(dataset, batch_size=batch_size)
 
@@ -26,9 +26,9 @@ def train(epochs, batch_size=5, learning_rate=1e-3):
             optimizer.zero_grad()
 
             # output = torch.maximum(model(image)[0, 0, :, :], model(image)[0, 1, :, :])
-            output = model(image)[0, :, :, :]
+            output = model(image)[0, :, :, :] 
 
-            loss = criterium(output, label)
+            loss = criterium(output, label[:, 0, :, :])
             loss.backward()
 
             optimizer.step()
