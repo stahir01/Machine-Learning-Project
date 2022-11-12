@@ -1,43 +1,38 @@
+import matplotlib.pyplot as plt
+from matplotlib.pylab import plt
+from matplotlib.ticker import MaxNLocator
 from isbi_em_seg_dataset import *
 from model import *
+from data_transformation import *
+from train_validate import *
 
-import torch
 
-def train(epochs, batch_size=2, learning_rate=1e-3):
-    dataset = ISBIEMSegDataset('./data/isbi_em_seg', transform=ToTensor())
-    dataloader = DataLoader(dataset, batch_size=batch_size)
+def train_model(dataset, num_epoch = 10, batch_size = 2, learning_rate = 0.01, weight_decay = 0.001, split_size = 0.8):
+   dataset = ISBIEMSegDataset(dataset, transform=ToTensor())
+   train_data, validate_data = split_data(dataset, split_size)
+   #print(len(train_data), len(validate_data))
 
-    model = build_model()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("****** " + str(device) + " is used. ******")
+   train_loss_values, valid_loss_values = [], []
 
-    criterium = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(lr=learning_rate, params=model.parameters())
+   for i in range(1, num_epoch+1):
+     train_loss = train(train_data, batch_size, learning_rate, weight_decay)
+     valid_loss = validate(validate_data, batch_size, learning_rate, weight_decay)
+     
+     train_loss_values.append(train_loss)
+     valid_loss_values.append(valid_loss)
+     print("Epoch {0}: train_loss {1} \t val_loss {2}".format(i, train_loss, valid_loss))
 
-    # Learning rate decay exponetially
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+    #print result
+   fig, ax = plt.subplots(1, 1)
+   plt.plot(train_loss_values, color = 'red', label = "Training Loss")
+   plt.plot(valid_loss_values, color = 'blue', label = "Validation Loss")
+   plt.yticks(np.arange(0, 1, step=0.2))
+   plt.xlabel("Epoch")
+   plt.ylabel("Loss")
+   plt.legend()
+   plt.plot()
 
-    for epoch in range(epochs):
-        for batch_index, (image, label) in enumerate(dataloader):
-            model.train()
 
-            image, label = image.to(device), label.to(device)
-        
-            optimizer.zero_grad()
-
-            # output = torch.maximum(model(image)[0, 0, :, :], model(image)[0, 1, :, :])
-            output = model(image)[0, :, :, :] 
-
-            loss = criterium(output, label[:, 0, :, :])
-            loss.backward()
-
-            optimizer.step()
-
-            if batch_index % 10 == 0:
-                print("Training Epoch: {} [{}/{} ({:.0f}%) \t Loss:{:.6f}]".format(epoch, batch_index*len(image), len(dataloader), 100. * batch_index/len(dataloader), loss.item()), end='\r')
-        
-        scheduler.step()
 
 if __name__ == "__main__":
-    
-    train(epochs=2)
+    train_model(dataset='/Users/syedalimuradtahir/Documents/WS 2022/Machine Learning Project/Machine-Learning-Project/data/isbi_em_seg')
