@@ -21,7 +21,8 @@ def train(dataset, batch_size, learning_rate, weight_decay):
   criterion = nn.CrossEntropyLoss().to(device)
   optimizer = optim.SGD(model.parameters(),
                         lr=learning_rate,
-                        weight_decay=weight_decay)
+                        weight_decay=weight_decay,
+                        momentum=0.99)
   
   train_loss, target_count = 0, 0
   model.train()
@@ -45,7 +46,7 @@ def train(dataset, batch_size, learning_rate, weight_decay):
 
 
 def validate(dataset, batch_size, learning_rate, weight_decay):
-  validate_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+  validate_loader = DataLoader(dataset, batch_size=batch_size)
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
   #print("The device used:", str(device))
 
@@ -56,7 +57,8 @@ def validate(dataset, batch_size, learning_rate, weight_decay):
   criterion = nn.CrossEntropyLoss().to(device)
   optimizer = optim.SGD(model.parameters(),
                         lr=learning_rate,
-                        weight_decay=weight_decay)
+                        weight_decay=weight_decay,
+                        momentum=0.99)
   
   val_loss, target_count = 0, 0
   model.train()
