@@ -1,5 +1,6 @@
 import os
-from torch.utils.data import Dataset, DataLoader
+import torch
+from torch.utils.data import Dataset, DataLoader, random_split
 from skimage import io
 import numpy as np
 from torchvision.transforms import ToTensor, Resize, Compose
@@ -33,20 +34,36 @@ class ISBIEMSegDataset(Dataset):
             label = self.transform(label)
         
         return image.float(), label.float()
-        
+
+def load_data(dataset='isbi_em_seg', transformation=None, n_train=None, n_test=None):
+
+    ds_reg = [
+        'isbi_em_seg',
+    ]
+
+    if not dataset in ds_reg:
+        print(f'Dataset not in registry, available datasets are: {ds_reg}')
+    else:
+        if not transformation:
+            transformation = ToTensor()
+        else:
+            transformation = torch.nn.Sequential(
+                ToTensor(),
+                transformation
+            )
+
+        dataset = ISBIEMSegDataset(f'./data/{dataset}', transform=transformation)  
+
+        if not (n_train and n_test):
+            total_len = len(dataset)
+            n_train = int(.8 * total_len)
+            n_test = total_len - n_train
+
+        train_set, test_set = random_split(dataset=dataset, lengths=[n_train, n_test]) 
+
+        return DataLoader(train_set), DataLoader(test_set)       
 
 if __name__ == '__main__':
-    dataset = ISBIEMSegDataset('./data/isbi_em_seg', transform=ToTensor())
     
-    BATCH_SIZE = 5
-    
-    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE)
-    s = next(iter(dataloader))
-    # a = 1
-    
-    # [5, 1, 572, 572]
-    print(s[0].shape)
-    examples = [np.array(s[0][i])[0,:,:] for i in range((s[0].shape)[0])]
-    
-    # Adjust height and width for visualization
-    show(examples, num_img=BATCH_SIZE, height=1, width=5)
+    train_set, test_set = load_data()
+    a=1

@@ -33,7 +33,7 @@ class UNet(nn.Module):
         self.conv17 = nn.Conv2d(128, 64, 3, padding='same')
         self.conv18 = nn.Conv2d(64, 64, 3, padding='same')
         self.conv19 = nn.Conv2d(64, 2, 1, padding='same')
-
+        self.sm = nn.Softmax2d()
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -114,6 +114,8 @@ class UNet(nn.Module):
         # print("conv18: ", x.shape)
         x = self.conv19(x)
         # print("conv19: ", x.shape)
+
+        x = self.sm(x)
 
         return x
 
