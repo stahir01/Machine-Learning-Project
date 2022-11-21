@@ -4,7 +4,6 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from skimage import io
 import numpy as np
 from torchvision.transforms import ToTensor, Resize, Compose
-from data_visualization import show
 
 class ISBIEMSegDataset(Dataset):
     def __init__(self, root_dir, transform=None) -> None:
@@ -25,9 +24,6 @@ class ISBIEMSegDataset(Dataset):
 
         image = io.imread(os.path.join(self.path_images, self.image_paths[index])) 
         label = io.imread(os.path.join(self.path_labels, self.label_paths[index])) 
-        
-        # print(image.shape)
-        # print(label.shape)
 
         if self.transform:
             image = self.transform(image)
@@ -35,7 +31,7 @@ class ISBIEMSegDataset(Dataset):
         
         return image.float(), label.float()
 
-def load_data(dataset='isbi_em_seg', transformation=None, n_train=None, n_test=None):
+def load_data(dataset='isbi_em_seg', transformation=None, n_train=None, n_test=None, batch_size=2):
 
     ds_reg = [
         'isbi_em_seg',
@@ -54,14 +50,14 @@ def load_data(dataset='isbi_em_seg', transformation=None, n_train=None, n_test=N
 
         dataset = ISBIEMSegDataset(f'./data/{dataset}', transform=transformation)  
 
-        if not (n_train and n_test):
+        if not (n_train or n_test):
             total_len = len(dataset)
             n_train = int(.8 * total_len)
             n_test = total_len - n_train
 
         train_set, test_set = random_split(dataset=dataset, lengths=[n_train, n_test]) 
 
-        return DataLoader(train_set), DataLoader(test_set)       
+        return DataLoader(train_set, batch_size=batch_size), DataLoader(test_set, batch_size=batch_size)       
 
 if __name__ == '__main__':
     

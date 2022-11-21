@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
-import numpy as np
+from mpl_toolkits.axes_grid1 import ImageGrid
 import os
+
+from data_loading import load_data
 
 def show(x, outfile = False, figsize_=(20,20), num_img=25, height=5, width=5):
     """
@@ -32,7 +34,29 @@ def show(x, outfile = False, figsize_=(20,20), num_img=25, height=5, width=5):
     plt.show()
 
 
-if __name__ == "__main__":
-    X_test = np.load("./data/X_test.npy")
-    show(X_test, True)
+def show_x_t(X_t, outfile=None, figsize_=(20,20), num_img=25, height=5, width=5):
     
+    fig = plt.figure(figsize=figsize_)
+    grid = ImageGrid(
+        fig, 111, 
+        nrows_ncols=(len(X_t[0]), 2),
+        axes_pad=0.1
+    )
+
+    for i in range(0, len(grid), 2):
+        grid[i].imshow(X_t[0][int(i/2)].reshape(512,512))
+        grid[i+1].imshow(X_t[1][int(i/2)].reshape(512,512))
+
+    if outfile:
+        # Check if the figure folder exists
+        if not os.path.exists(os.getcwd()+"/figure"):
+            os.makedirs(os.getcwd()+"/figure")
+        plt.savefig(f"./figure/{outfile}")
+        
+    plt.show()
+
+if __name__ == "__main__":
+    data_loader, _ = load_data('isbi_em_seg', n_train=30, n_test=0, batch_size=30)
+    data_set = next(iter(data_loader)) 
+
+    show_x_t(data_set, 'image_double.png')

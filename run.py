@@ -1,13 +1,7 @@
-import matplotlib.pyplot as plt
-from matplotlib.pylab import plt
-from matplotlib.ticker import MaxNLocator
-from isbi_em_seg_dataset import load_data
+from data_loading import load_data
 from model import UNet
-from data_transformation import *
-from train_validate import *
 
 from tqdm import tqdm
-
 
 def train_model(model, train_loader, optimizer, criterion, device, num_epoch = 10):
    for epoch in range(num_epoch):
