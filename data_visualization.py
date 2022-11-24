@@ -34,7 +34,7 @@ def show(x, outfile = False, figsize_=(20,20), num_img=25, height=5, width=5):
     plt.show()
 
 
-def show_x_t(X_t, outfile=None, figsize_=(20,20), num_img=25, height=5, width=5):
+def show_x_t(X_t, outfile=None, figsize_=(100, 100), num_img=25, height=5, width=5):
     
     fig = plt.figure(figsize=figsize_)
     grid = ImageGrid(
@@ -44,8 +44,8 @@ def show_x_t(X_t, outfile=None, figsize_=(20,20), num_img=25, height=5, width=5)
     )
 
     for i in range(0, len(grid), 2):
-        grid[i].imshow(X_t[0][int(i/2)].reshape(512,512))
-        grid[i+1].imshow(X_t[1][int(i/2)].reshape(512,512))
+        grid[i].imshow(X_t[0][int(i/2)].squeeze())
+        grid[i+1].imshow(X_t[1][int(i/2)].squeeze())
 
     if outfile:
         # Check if the figure folder exists
