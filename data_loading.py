@@ -13,8 +13,8 @@ class ISBIEMSegDataset(Dataset):
         self.path_images = os.path.join(self.root_dir, 'images')
         self.path_labels = os.path.join(self.root_dir, 'labels')
 
-        self.image_paths = os.listdir(self.path_images)
-        self.label_paths = os.listdir(self.path_labels)
+        self.image_paths = sorted(os.listdir(self.path_images))
+        self.label_paths = sorted(os.listdir(self.path_labels))
 
 
     def __len__(self):

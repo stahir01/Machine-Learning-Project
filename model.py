@@ -75,6 +75,8 @@ class NewUNet(nn.Module):
 
         x = self.out_conv(x)
 
+        x = F.softmax(x, dim=1)
+
         return x
 
 class UNet(nn.Module):

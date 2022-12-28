@@ -55,6 +55,19 @@ def show_x_t(X_t, outfile=None, figsize_=(100, 100), num_img=25, height=5, width
         
     plt.show()
 
+def plot_pair(image, mask):
+    w = 10
+    h = 10
+    fig = plt.figure(figsize=(8, 8))
+    columns = 2
+    rows = 1
+    for i in range(1, columns*rows +1):
+        img = image if i == 1 else mask
+        img = img.cpu().swapaxes(0,-1).swapaxes(0,1)
+        fig.add_subplot(rows, columns, i)
+        plt.imshow(img)
+    plt.show()
+
 if __name__ == "__main__":
     data_loader, _ = load_data('isbi_em_seg', n_train=30, n_test=0, batch_size=30)
     data_set = next(iter(data_loader)) 
