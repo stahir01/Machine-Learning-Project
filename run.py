@@ -1,3 +1,6 @@
+import torch
+from torch import nn, optim
+
 from data_loading import load_data
 from model import UNet
 
