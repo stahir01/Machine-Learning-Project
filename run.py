@@ -1,6 +1,5 @@
 import torch
 from torch import nn, optim
-
 from data_loading import load_data
 from model import UNet
 
@@ -25,12 +24,13 @@ def train_model(model, train_loader, optimizer, criterion, device, num_epoch = 1
          
          train_loss_values.append(loss.item())
       
-      print(f'Average loss: {np.array(train_loss_values).mean()}')
+      print(f'Average loss: {torch.tensor(train_loss_values).mean()}')
 
       
 
 def main():
    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+   print(f"Running on: {device}")
 
    train_loader, test_loader = load_data()
    model = UNet().to(device)
