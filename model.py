@@ -11,9 +11,12 @@ class DownBlock(nn.Module):
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
+
+        h = x.clone()
+
         x = F.max_pool2d(x, kernel_size=2, stride=2)
 
-        return x
+        return x, h
 
 class UpBlock(nn.Module):
     def __init__(self, in_channels, out_channels) -> None:
@@ -57,14 +60,10 @@ class NewUNet(nn.Module):
         self.out_conv = nn.Conv2d(in_channels=64, out_channels=2, kernel_size=1)
 
     def forward(self, x):
-        x = self.down_block_1(x)
-        h_1 = x.clone()
-        x = self.down_block_2(x)
-        h_2 = x.clone()
-        x = self.down_block_3(x)
-        h_3 = x.clone()
-        x = self.down_block_4(x)
-        h_4 = x.clone()
+        x, h_1 = self.down_block_1(x)
+        x, h_2 = self.down_block_2(x)
+        x, h_3 = self.down_block_3(x)
+        x, h_4 = self.down_block_4(x)
 
         x = self.middle_conv_1(x)
         x = self.middle_conv_2(x)
