@@ -5,8 +5,8 @@ import torch.nn.functional as F
 class DownBlock(nn.Module):
     def __init__(self, in_channels, out_channels) -> None:
         super(DownBlock, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, 3)
-        self.conv2 = nn.Conv2d(out_channels, out_channels, 3)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, 3, padding='same')
+        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, padding='same')
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -22,8 +22,8 @@ class UpBlock(nn.Module):
     def __init__(self, in_channels, out_channels) -> None:
         super(UpBlock, self).__init__()
         self.up_conv = nn.ConvTranspose2d(in_channels, out_channels, 2, 2)
-        self.conv1 = nn.Conv2d(in_channels, out_channels, 3)
-        self.conv2 = nn.Conv2d(out_channels, out_channels, 3)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, 3, padding='same')
+        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, padding='same')
 
     def forward(self, x, h):
         x = self.up_conv(x)
@@ -49,8 +49,8 @@ class NewUNet(nn.Module):
         self.down_block_3 = DownBlock(in_channels=128, out_channels=256)
         self.down_block_4 = DownBlock(in_channels=256, out_channels=512)
 
-        self.middle_conv_1 = nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3)
-        self.middle_conv_2 = nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3)
+        self.middle_conv_1 = nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, padding='same')
+        self.middle_conv_2 = nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, padding='same')
 
         self.up_block_1 = UpBlock(in_channels=1024, out_channels=512)
         self.up_block_2 = UpBlock(in_channels=512, out_channels=256)
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     # model = build_model()
     model = NewUNet()
 
-    X = torch.rand(1, 1, 572, 572)
+    X = torch.rand(1, 1, 512, 512)
     X = model(X)
 
     print(X.shape)
