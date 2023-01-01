@@ -46,11 +46,11 @@ def main():
    train_loader, test_loader = load_data(batch_size=4)
    model = NewUNet().to(device)
 
-   optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+   optimizer = optim.SGD(model.parameters(), lr=0.02, momentum=0.9)
    
    criterion = nn.BCEWithLogitsLoss()
 
-   train_model(model, train_loader, optimizer, criterion, device, num_epoch=1000)
+   train_model(model, train_loader, optimizer, criterion, device, num_epoch=100)
 
 if __name__ == "__main__":
    main()
