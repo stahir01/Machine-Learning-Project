@@ -2,6 +2,7 @@ import torch
 from torch import nn, optim
 from data_loading import load_data
 from model import NewUNet
+from unet_model import UNet
 
 from tqdm import tqdm
 
@@ -43,10 +44,10 @@ def main():
    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
    print(f"Running on: {device}")
 
-   train_loader, test_loader = load_data(batch_size=4)
-   model = NewUNet().to(device)
+   train_loader, test_loader = load_data(batch_size=1, n_train=1, n_test=0)
+   model = UNet(n_channels=1, n_classes=2).to(device)
 
-   optimizer = optim.SGD(model.parameters(), lr=0.02, momentum=0.9)
+   optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.99)
    
    criterion = nn.BCEWithLogitsLoss()
 

@@ -16,6 +16,9 @@ class ISBIEMSegDataset(Dataset):
         self.image_paths = sorted(os.listdir(self.path_images))
         self.label_paths = sorted(os.listdir(self.path_labels))
 
+        all = torch.stack([torch.tensor(io.imread(os.path.join(self.path_images, i))) for i in self.image_paths]).float()
+        self.mean = all.mean(dim=0)
+        self.std  = all.std(dim=0)
 
     def __len__(self):
         return len(self.image_paths)
@@ -28,6 +31,8 @@ class ISBIEMSegDataset(Dataset):
         if self.transform:
             image = self.transform(image)
             label = self.transform(label)
+
+        # image = (image - self.mean) / self.std
         
         return image.float(), label.float()
 
