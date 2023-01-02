@@ -2,7 +2,6 @@ import torch
 from torch import nn, optim
 from data_loading import load_data
 from model import NewUNet
-from unet_model import UNet
 
 from tqdm import tqdm
 
@@ -16,7 +15,7 @@ import matplotlib.pyplot as plt
 
 def train_model(model, train_loader, optimizer, criterion, device, num_epoch = 10):
 
-   losses = []
+   train_losses, test_losses = [], []
    for epoch in range(num_epoch):
 
       train_loss_values, valid_loss_values = [], []
@@ -35,23 +34,22 @@ def train_model(model, train_loader, optimizer, criterion, device, num_epoch = 1
       
       mean_loss = torch.tensor(train_loss_values).mean()
       print(f'Average loss (@ {epoch+1}): {mean_loss}')
-      losses.append(mean_loss)
+      train_losses.append(mean_loss)
    
-   plt.plot(losses)
+   plt.plot(train_losses)
    plt.show()
 
 def main():
    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
    print(f"Running on: {device}")
 
-   train_loader, test_loader = load_data(batch_size=1, n_train=1, n_test=0)
-   model = UNet(n_channels=1, n_classes=2).to(device)
-
-   optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.99)
+   train_loader, test_loader = load_data(batch_size=3, n_train=.5, n_test=.5)
+   model = NewUNet().to(device)
    
+   optimizer = optim.SGD(model.parameters(), lr=0.03, momentum=0.99)   
    criterion = nn.BCEWithLogitsLoss()
 
-   train_model(model, train_loader, optimizer, criterion, device, num_epoch=100)
+   train_model(model, train_loader, optimizer, criterion, device, num_epoch=150)
 
 if __name__ == "__main__":
    main()
