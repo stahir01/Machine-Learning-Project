@@ -6,9 +6,9 @@ import torchvision.transforms.functional as TF
 class DownBlock(nn.Module):
     def __init__(self, in_channels, out_channels) -> None:
         super(DownBlock, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, 3, padding='same')
+        self.conv1 = nn.Conv2d(in_channels, out_channels, 3, padding = 'same')
         self.bn1 = nn.BatchNorm2d(out_channels)
-        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, padding='same')
+        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, padding = 'same')
         self.bn2 = nn.BatchNorm2d(out_channels)
 
     def forward(self, x):
@@ -25,9 +25,9 @@ class UpBlock(nn.Module):
     def __init__(self, in_channels, out_channels) -> None:
         super(UpBlock, self).__init__()
         self.up_conv = nn.ConvTranspose2d(in_channels, out_channels, 2, 2)
-        self.conv1 = nn.Conv2d(in_channels, out_channels, 3, padding='same')
+        self.conv1 = nn.Conv2d(in_channels, out_channels, 3, padding = 'same')
         self.bn1 = nn.BatchNorm2d(out_channels)
-        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, padding='same')
+        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, padding = 'same')
         self.bn2 = nn.BatchNorm2d(out_channels)
 
     def forward(self, x, h):
@@ -54,8 +54,8 @@ class NewUNet(nn.Module):
         self.down_block_3 = DownBlock(in_channels=128, out_channels=256)
         self.down_block_4 = DownBlock(in_channels=256, out_channels=512)
 
-        self.middle_conv_1 = nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, padding='same')
-        self.middle_conv_2 = nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, padding='same')
+        self.middle_conv_1 = nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, padding = 'same')
+        self.middle_conv_2 = nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, padding = 'same')
 
         self.up_block_1 = UpBlock(in_channels=1024, out_channels=512)
         self.up_block_2 = UpBlock(in_channels=512, out_channels=256)
@@ -79,8 +79,6 @@ class NewUNet(nn.Module):
         x = self.up_block_4(x, h_1)
 
         x = self.out_conv(x)
-
-        # x = F.softmax(x, dim=1)
 
         return x
 

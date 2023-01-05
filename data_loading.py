@@ -6,7 +6,7 @@ import numpy as np
 from torchvision.transforms import ToTensor, Resize, Compose
 
 class ISBIEMSegDataset(Dataset):
-    def __init__(self, root_dir, transform=None) -> None:
+    def __init__(self, root_dir, transform=None, train=True, split=.8) -> None:
         self.root_dir = root_dir
         self.transform = transform
 
@@ -16,9 +16,13 @@ class ISBIEMSegDataset(Dataset):
         self.image_paths = sorted(os.listdir(self.path_images))
         self.label_paths = sorted(os.listdir(self.path_labels))
 
-        # all = torch.stack([torch.tensor(io.imread(os.path.join(self.path_images, i))) for i in self.image_paths]).float()
-        # self.mean = all.mean(dim=0)
-        # self.std  = all.std(dim=0)
+        if train:
+            self.image_paths = self.image_paths[:round(split*len(self.image_paths))]
+            self.label_paths = self.label_paths[:round(split*len(self.label_paths))]
+        else:
+            self.image_paths = self.image_paths[round(split*len(self.image_paths)):]
+            self.label_paths = self.label_paths[round(split*len(self.label_paths)):]
+
 
     def __len__(self):
         return len(self.image_paths)
@@ -53,14 +57,8 @@ def load_data(dataset='isbi_em_seg', transformation=None, n_train=None, n_test=N
                 transformation
             )
 
-        dataset = ISBIEMSegDataset(f'./data/{dataset}', transform=transformation)  
-
-        if not (n_train or n_test):
-            total_len = len(dataset)
-            n_train = int(.8 * total_len)
-            n_test = total_len - n_train
-
-        train_set, test_set = random_split(dataset=dataset, lengths=[n_train, n_test]) 
+        train_set = ISBIEMSegDataset(f'./data/{dataset}', transform=transformation, train=True, split=0.8)  
+        test_set = ISBIEMSegDataset(f'./data/{dataset}', transform=transformation, train=False, split=0.8)
 
         return DataLoader(train_set, batch_size=batch_size), DataLoader(test_set, batch_size=batch_size)       
 
