@@ -7,4 +7,4 @@
 #$ -t 1-1      # start 100 instances: from 1 to 100
 #$ -l cuda=1   # request one GPU
 
-./env/bin/python run.py
+./env/bin/python train_apply.py
