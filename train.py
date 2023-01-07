@@ -15,10 +15,13 @@ from torchvision.transforms import InterpolationMode
 
 import matplotlib.pyplot as plt
 
+import elasticdeform
+
 def get_test_loss(model, test_loader, criterion, device):
    losses = []
    with torch.no_grad():
       for i, data in enumerate(tqdm(test_loader)):
+
          image, mask = data[0].to(device), data[1].to(device)
          output = model(image)
          # output = F.softmax(output, dim=1)
@@ -48,7 +51,17 @@ def test_model(model, test_loader, device):
 def train_one_epoch(model, train_loader, optimizer, criterion, device):
    losses = []
    for i, data in enumerate(tqdm(train_loader, leave=False)):
-      image, mask = data[0].to(device), data[1].to(device)
+      # elastic deform
+      deformed_images = []
+      deformed_masks = []
+      for image, mask in zip(data[0], data[1]):
+         [image_deformed, mask_deformed] = elasticdeform.deform_random_grid([image.numpy(), mask.numpy()], axis=(1, 2), sigma=25, points=3, rotate=30, zoom=1.5)
+         deformed_images.append(image_deformed)
+         deformed_masks.append(mask_deformed)
+      deformed_images = torch.tensor(deformed_images)
+      deformed_masks = torch.tensor(deformed_masks)
+
+      image, mask = image.to(device), mask.to(device)
 
       optimizer.zero_grad()
 
