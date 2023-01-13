@@ -47,9 +47,9 @@ class UpBlock(nn.Module):
 
 
 class NewUNet(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, in_channel) -> None:
         super(NewUNet, self).__init__()
-        self.down_block_1 = DownBlock(in_channels=1, out_channels=64)
+        self.down_block_1 = DownBlock(in_channels=in_channel, out_channels=64)
         self.down_block_2 = DownBlock(in_channels=64, out_channels=128)
         self.down_block_3 = DownBlock(in_channels=128, out_channels=256)
         self.down_block_4 = DownBlock(in_channels=256, out_channels=512)
