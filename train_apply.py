@@ -1,5 +1,6 @@
 import torch
 from torch import nn, optim
+import matplotlib.pyplot as plt
 
 from data_loading import load_data
 from model import NewUNet
@@ -32,13 +33,40 @@ def train_apply(method = 'train_model',dataset = 'isbi_em_seg', num_epochs=25, l
 
     eval(f'{method}(model, train_loader, optimizer, criterion, device, num_epoch={num_epochs})')
 
-    predictions = test_model(model, test_loader, device)
+    predictions, mask, avg_test_score, avg_pixel_score, avg_dice_score = test_model(model, test_loader, criterion, device)
 
-    return predictions
-
-def main():
-    predictions = train_apply(num_epochs=3)
-    print(predictions.shape)
+    return predictions, mask, avg_test_score, avg_pixel_score, avg_dice_score
 
 if __name__ == '__main__':
-    main()
+    predictions, mask, test_score, pixel_score, dice_score = train_apply(num_epochs=50, lr=0.01)
+    #print(predictions.shape)
+
+    prediction_test = predictions#[:, 1:2, :, :]
+    mask_test = mask
+    #Final Result
+    fig = plt.figure(figsize=(20,20))
+    for i in range (len(prediction_test)):
+        while i < 5:
+            predict_results = prediction_test[i].cpu().numpy()
+            mask_results = mask_test[i].cpu().numpy()
+
+
+            #predict_results = (predict_results * 255.0).astype("uint8")
+            #mask_results = (mask_results * 255.0).astype("uint8")
+
+            predict_results = predict_results[0]
+            mask_results = mask_results[0]
+
+            predict_results = predict_results.squeeze()
+            mask_results = mask_results.squeeze()
+            #print("Predict Results: ", predict_results)
+            #print("Mask Results: ", mask_results)
+
+            plt.subplot(5,2,2*i+1)
+            plt.imshow(mask_results)
+            plt.axis("off")
+            plt.subplot(5,2,2*i+2)
+            plt.imshow(predict_results, cmap = 'gray') 
+            plt.axis("off")
+            i+=1
+    plt.show()

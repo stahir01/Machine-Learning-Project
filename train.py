@@ -3,6 +3,7 @@ from torch import nn, optim
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+import time
 
 from data_loading import load_data
 from model import NewUNet
@@ -36,18 +37,39 @@ def custom_loss(output, mask):
    # return (output - mask).abs().mean(dim=(1,2,3)).mean()
    return ((output - mask)**2).mean(dim=(1,2,3)).norm()
 
-def test_model(model, test_loader, device):
-   model.eval()
-
-   predictions = []
-   with torch.no_grad():
+def test_model(model, test_loader, criterion, device):
+    
+    model = model.eval()
+    predictions, mask_result = [], []
+    
+    with torch.no_grad():
       for i, data in enumerate(tqdm(test_loader)):
          image, mask = data[0].to(device), data[1].to(device)
          output = model(image)
-         predictions.append(output)
+         
+         test_output = model(image)  
+         test_output = test_output[:,1].unsqueeze(dim=1)  
 
-   predictions = torch.cat(predictions, dim=0)
-   return predictions
+         #Test score       
+         test_score = calculate_iou_batch(test_output, mask)
+         avg_test_score = (torch.tensor(test_score).mean()).cpu().numpy().astype(float)
+
+         #Pixel accuracy
+         pixel_score = pixel_accuracy(test_output, mask)
+         avg_pixel_score = (torch.tensor(pixel_score).mean()).cpu().numpy().astype(float)
+
+         #Dice Score
+         dice_score = dice_coeff(test_output, mask)
+         avg_dice_score = (torch.tensor(dice_score).mean()).cpu().numpy().astype(float)
+
+
+         predictions.append(output)
+         mask_result.append(mask) #Used for plotting images labels/masks
+
+         
+    predictions = torch.cat(predictions, dim=0)
+    mask = torch.cat(mask_result, dim=0)
+    return predictions, mask, avg_test_score, avg_pixel_score, avg_dice_score
 
 def train_model(model, train_loader, optimizer, criterion, device, num_epoch = 100):
   
@@ -86,6 +108,8 @@ def train_model(model, train_loader, optimizer, criterion, device, num_epoch = 1
   plt.legend(['Train Loss', 'Train Score'])
   plt.title('Train Loss & Train Score')
   plt.show()
+  plt.pause(5)
+  plt.close()
 
 
 
