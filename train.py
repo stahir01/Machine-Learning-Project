@@ -1,6 +1,8 @@
 import torch
 from torch import nn, optim
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 
 from data_loading import load_data
 from model import NewUNet
@@ -14,8 +16,7 @@ from torchvision.transforms import Resize
 from torchvision.transforms import InterpolationMode
 
 import matplotlib.pyplot as plt
-
-import elasticdeform
+from metrics import *
 
 def get_test_loss(model, test_loader, criterion, device):
    losses = []
@@ -48,6 +49,52 @@ def test_model(model, test_loader, device):
    predictions = torch.cat(predictions, dim=0)
    return predictions
 
+def train_model(model, train_loader, optimizer, criterion, device, num_epoch = 100):
+  
+  avg_loss_val, avg_score_val = [], []
+  model.train()
+
+  for i in range (1, num_epoch+1):
+    
+    losses = []
+    
+    for batch_index, (image, label) in enumerate(tqdm(train_loader)):
+      image, mask = image.to(device), label.to(device)
+      
+      optimizer.zero_grad()
+      output = model(image)
+      output = output[:,1].unsqueeze(dim=1)
+      
+      loss = criterion(output, mask)
+      score = calculate_iou_batch(output, label)
+      losses.append(loss)
+      loss.backward()
+      optimizer.step()
+       
+      avg_loss = torch.tensor(losses).mean()
+      avg_score = torch.tensor(score).mean()
+
+    avg_loss_val.append(avg_loss)
+    avg_score_val.append(avg_score)
+    print("Epoch {0}: train_loss {1} \t train_score {2}".format(i, avg_loss, avg_score))
+  plt.figure(figsize=(25,5))
+  plt.plot(avg_loss_val,'-o')
+  plt.plot(avg_score_val,'-x')
+  plt.xlabel('epochs')
+  plt.ylabel('Avg Loss & Score')
+  plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+  plt.legend(['Train Loss', 'Train Score'])
+  plt.title('Train Loss & Train Score')
+  plt.show()
+
+
+
+
+
+
+
+
+'''
 def train_one_epoch(model, train_loader, optimizer, criterion, device):
    losses = []
    for i, data in enumerate(tqdm(train_loader, leave=False)):
@@ -94,3 +141,4 @@ def main():
 
 if __name__ == "__main__":
    main()
+'''

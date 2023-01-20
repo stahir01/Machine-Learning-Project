@@ -5,6 +5,7 @@ from data_loading import load_data
 from model import NewUNet
 
 from train import train_model, test_model
+from entropy_loss import DiceBCELoss
 
 NUM_EPOCHS = 25
 LR = 0.01
@@ -26,7 +27,8 @@ def train_apply(method = 'train_model',dataset = 'isbi_em_seg', num_epochs=25, l
     model = NewUNet(in_channel).to(device)
 
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)   
-    criterion = nn.BCEWithLogitsLoss()
+    #criterion = nn.BCEWithLogitsLoss()
+    criterion = DiceBCELoss()
 
     eval(f'{method}(model, train_loader, optimizer, criterion, device, num_epoch={num_epochs})')
 
@@ -35,7 +37,7 @@ def train_apply(method = 'train_model',dataset = 'isbi_em_seg', num_epochs=25, l
     return predictions
 
 def main():
-    predictions = train_apply(num_epochs=5)
+    predictions = train_apply(num_epochs=3)
     print(predictions.shape)
 
 if __name__ == '__main__':

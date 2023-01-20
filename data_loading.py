@@ -63,6 +63,6 @@ def load_data(dataset='isbi_em_seg', transformation=None, n_train=None, n_test=N
         return DataLoader(train_set, batch_size=batch_size), DataLoader(test_set, batch_size=batch_size)       
 
 if __name__ == '__main__':
-    
-    train_set, test_set = load_data()
-    a=1
+      
+      train_set, test_set = load_data()
+      print(len(train_set), len(test_set))
