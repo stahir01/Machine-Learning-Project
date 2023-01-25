@@ -35,8 +35,6 @@ class ISBIEMSegDataset(Dataset):
         if self.transform:
             image = self.transform(image)
             label = self.transform(label)
-
-        # image = (image - self.mean) / self.std
         
         return image.float(), label.float()
 
@@ -44,6 +42,7 @@ def load_data(dataset='isbi_em_seg', transformation=None, n_train=None, n_test=N
 
     ds_reg = [
         'isbi_em_seg',
+        'isbi_em_seg_100',
     ]
 
     if not dataset in ds_reg:

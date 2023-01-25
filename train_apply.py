@@ -22,7 +22,7 @@ def train_apply(method = 'train_model',dataset = 'isbi_em_seg', num_epochs=25, l
     train_loader, test_loader = load_data(dataset=dataset, batch_size=batch_size, n_train=0.8, n_test=0.2)
     
     # switch to RGB dataset
-    if dataset != 'isbi_em_seg':
+    if dataset != 'isbi_em_seg' and dataset != 'isbi_em_seg_100':
         in_channel = 3
 
     model = NewUNet(in_channel).to(device)
@@ -38,7 +38,7 @@ def train_apply(method = 'train_model',dataset = 'isbi_em_seg', num_epochs=25, l
     return predictions, mask, avg_test_score, avg_pixel_score, avg_dice_score
 
 if __name__ == '__main__':
-    predictions, mask, test_score, pixel_score, dice_score = train_apply(num_epochs=50, lr=0.01)
+    predictions, mask, test_score, pixel_score, dice_score = train_apply(num_epochs=NUM_EPOCHS, lr=LR, batch_size=BATCH_SIZE, dataset='isbi_em_seg')
     #print(predictions.shape)
 
     prediction_test = predictions#[:, 1:2, :, :]

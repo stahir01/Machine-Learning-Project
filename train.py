@@ -26,7 +26,6 @@ def get_test_loss(model, test_loader, criterion, device):
 
          image, mask = data[0].to(device), data[1].to(device)
          output = model(image)
-         # output = F.softmax(output, dim=1)
          output = output[:,1].unsqueeze(dim=1)
 
          loss = criterion(output, mask)
