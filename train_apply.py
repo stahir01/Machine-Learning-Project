@@ -23,14 +23,14 @@ def train_apply(method = 'train_model',dataset = 'isbi_em_seg', num_epochs=25, l
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)   
     criterion = nn.BCEWithLogitsLoss()
 
-    eval(f'{method}(model, train_loader, optimizer, criterion, device, num_epoch={num_epochs})')
+    eval(f'{method}(model, train_loader, test_loader, optimizer, criterion, device, num_epoch={num_epochs})')
 
     predictions = test_model(model, test_loader, device)
 
     return predictions
 
 def main():
-    predictions = train_apply(num_epochs=5)
+    predictions = train_apply(num_epochs=50)
     print(predictions.shape)
 
 if __name__ == '__main__':

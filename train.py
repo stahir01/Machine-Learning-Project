@@ -15,21 +15,24 @@ from torchvision.transforms import InterpolationMode
 
 import matplotlib.pyplot as plt
 
-import elasticdeform
+from metrics import calculate_iou
 
-def get_test_loss(model, test_loader, criterion, device):
-   losses = []
+def get_test_metrics(model, test_loader, criterion, device):
+   losses, ious = [], []
    with torch.no_grad():
-      for i, data in enumerate(tqdm(test_loader)):
+      for i, data in enumerate(test_loader):
 
          image, mask = data[0].to(device), data[1].to(device)
          output = model(image)
-         # output = F.softmax(output, dim=1)
          output = output[:,1].unsqueeze(dim=1)
 
          loss = criterion(output, mask)
          losses.append(loss.item())
-   return torch.tensor(losses).mean()
+
+         iou = calculate_iou(output, mask)
+         ious.append(iou.item())
+
+   return torch.tensor(losses).mean(), torch.tensor(ious).mean()
 
 def custom_loss(output, mask):
    # return (output - mask).abs().mean(dim=(1,2,3)).mean()
@@ -49,18 +52,8 @@ def test_model(model, test_loader, device):
    return predictions
 
 def train_one_epoch(model, train_loader, optimizer, criterion, device):
-   losses = []
-   for i, data in enumerate(tqdm(train_loader, leave=False)):
-      # elastic deform
-      deformed_images = []
-      deformed_masks = []
-      for image, mask in zip(data[0], data[1]):
-         [image_deformed, mask_deformed] = elasticdeform.deform_random_grid([image.numpy(), mask.numpy()], axis=(1, 2), sigma=25, points=3, rotate=30, zoom=1.5)
-         deformed_images.append(image_deformed)
-         deformed_masks.append(mask_deformed)
-      deformed_images = torch.tensor(deformed_images)
-      deformed_masks = torch.tensor(deformed_masks)
-
+   losses, ious = [], []
+   for i, (image, mask) in enumerate(tqdm(train_loader, leave=False)):
       image, mask = image.to(device), mask.to(device)
 
       optimizer.zero_grad()
@@ -69,22 +62,39 @@ def train_one_epoch(model, train_loader, optimizer, criterion, device):
       output = output[:,1].unsqueeze(dim=1)
 
       loss = criterion(output, mask)
-      losses.append(loss)
+      iou = calculate_iou(output, mask)
+      losses.append(loss.item())
+      ious.append(iou.item())
       loss.backward()
       optimizer.step()
 
    avg_loss = torch.tensor(losses).mean()
-   return avg_loss 
+   avg_iou = torch.tensor(ious).mean()
+   return avg_loss, avg_iou
          
-def train_model(model, train_loader, optimizer, criterion, device, num_epoch = 100):
+def train_model(model, train_loader, test_loader, optimizer, criterion, device, num_epoch = 100):
    model.train()
 
-   pbar = tqdm(range(num_epoch))
-   pbar.set_description(f'Loss: _.____')
-   for epoch in pbar: 
-      avg_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
+   avg_ious_train, avg_ious_test = [], []
+   avg_losses_train, avg_losses_test = [], []
 
-      pbar.set_description(f'Loss: {avg_loss:0.4}')
+   for epoch in range(num_epoch): 
+      avg_loss_train, avg_iou_train = train_one_epoch(model, train_loader, optimizer, criterion, device)
+      avg_loss_test, avg_iou_test = get_test_metrics(model, test_loader, criterion, device)
+
+      avg_ious_train.append(avg_iou_train)
+      avg_ious_test.append(avg_iou_test)
+      avg_losses_train.append(avg_loss_train)
+      avg_losses_test.append(avg_loss_test)
+      print(epoch, avg_loss_train, avg_iou_train, avg_loss_test, avg_iou_test)
+
+   plt.plot(avg_losses_train, label='Training Loss')
+   plt.plot(avg_ious_train, label='Training IoU')
+   plt.plot(avg_losses_test, label='Testing Loss')
+   plt.plot(avg_ious_test, label='Testing IoU')
+   plt.legend(loc='best')
+   plt.grid(visible=True, which='both')
+   plt.show()
 
 def main():
    pass
