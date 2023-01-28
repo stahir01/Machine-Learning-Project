@@ -38,16 +38,51 @@ class ISBIEMSegDataset(Dataset):
         
         return image.float(), label.float()
 
+
+class RGBDataset(Dataset):
+    def __init__(self, transform=None, train=True, split=.8):
+        loaded = np.load("./data/training_data.npz")
+        self.X = loaded["a"]
+        self.y = loaded["b"]
+
+        if train:
+            self.images = self.X[:round(split*len(self.X))]
+            self.labels = self.y[:round(split*len(self.y))]
+        else:
+            self.images = self.X[round(split*len(self.X)):]
+            self.labels = self.y[round(split*len(self.y)):]
+
+    def __len__(self):
+        return len(self.X)
+
+    def __getitem__(self, index):
+
+        image = self.images[index]
+        label = self.labels[index]
+
+        if self.transform:
+            image = self.transform(image)
+            label = self.transform(label)
+        
+        return image.float(), label.float()
+
+
 def load_data(dataset='isbi_em_seg', transformation=None, n_train=None, n_test=None, batch_size=2):
 
     ds_reg = [
         'isbi_em_seg',
         'isbi_em_seg_100',
+        'rgb'
     ]
 
     if not dataset in ds_reg:
         print(f'Dataset not in registry, available datasets are: {ds_reg}')
-    else:
+    elif dataset == "rgb":
+        transformation = ToTensor()
+        train_set = RGBDataset(transform=transformation, train=True, split=0.8)  
+        test_set = RGBDataset(transform=transformation, train=False, split=0.8)
+        return DataLoader(train_set, batch_size=batch_size), DataLoader(test_set, batch_size=batch_size)
+    else:   
         if not transformation:
             transformation = ToTensor()
         else:
@@ -63,5 +98,5 @@ def load_data(dataset='isbi_em_seg', transformation=None, n_train=None, n_test=N
 
 if __name__ == '__main__':
       
-      train_set, test_set = load_data()
+      train_set, test_set = load_data("rgb")
       print(len(train_set), len(test_set))
