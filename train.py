@@ -36,7 +36,7 @@ def get_test_metrics(model, test_loader, criterion, device):
          iou = calculate_iou(output, mask)
          ious.append(iou.item())
 
-   return torch.tensor(losses).mean().cpu().numpy().astype(float), torch.tensor(ious).mean().cpu().numpy().astype(float), torch.tensor(confidences).mean().cpu().numpy().astype(float)
+   return torch.tensor(losses).mean().cpu().numpy().astype(float), torch.tensor(ious).mean().cpu().numpy().astype(float)
 
 def custom_loss(output, mask):
    return (output - mask).abs().mean(dim=(1,2,3)).mean()
@@ -97,13 +97,13 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, device, 
 
    for epoch in range(num_epoch): 
       avg_loss_train, avg_iou_train = train_one_epoch(model, train_loader, optimizer, criterion, device)
-      avg_loss_test, avg_iou_test, prec_score = get_test_metrics(model, test_loader, criterion, device)
+      avg_loss_test, avg_iou_test= get_test_metrics(model, test_loader, criterion, device)
 
       avg_ious_train.append(avg_iou_train)
       avg_ious_test.append(avg_iou_test)
       avg_losses_train.append(avg_loss_train)
       avg_losses_test.append(avg_loss_test)
-      print("Epoch {0}: train_loss {1} \t train_score {2} \t test_loss {3} \t test_score{4} \t precision_score {5}".format(epoch, avg_loss_train, avg_iou_train, avg_loss_test, avg_iou_test, prec_score))
+      print("Epoch {0}: train_loss {1} \t train_score {2} \t test_loss {3} \t test_score{4}".format(epoch, avg_loss_train, avg_iou_train, avg_loss_test, avg_iou_test))
       
    plt.figure(figsize=(25,5))
    plt.plot(avg_losses_train, label='Training Loss')
